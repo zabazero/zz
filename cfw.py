@@ -709,7 +709,7 @@ def handle_proxy(message):
     new_file_path = os.path.join(users_directory, new_file_name)
     
     replace_proxy_ip_in_file(new_proxy_ip, new_file_path)
-    bot.send_message(message.chat.id, f"New proxy setting added ➡️ {new_proxy_ip}")
+    bot.send_message(message.chat.id, f"New Proxy Setting Added ➡️{new_proxy_ip}")
 
     new_txt_file_name = new_file_name.replace('.js', '.txt')
     create_duplicate_file('workertemp.txt', os.path.join(users_directory, new_txt_file_name))
