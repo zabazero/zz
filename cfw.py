@@ -81,7 +81,7 @@ def handle_proxies_input(message):
             with open(filename, 'w') as file:
                 for proxy in proxies:
                     file.write(proxy.strip() + '\n')
-            bot.send_message(message.chat.id, "✅Proxies saved successfully.✅")
+            bot.send_message(message.chat.id, "Proxies Saved ✅")
             send_welcome(message)
         else:
             bot.send_message(message.chat.id, "No proxies provided. Please send at least one proxy.")
@@ -288,7 +288,7 @@ def change_all_user_proxies(call):
     connection.close()
 
     if options:
-        proxy_message = bot.send_message(call.message.chat.id, "Please select the new proxy IP from the list or enter a new one:", reply_markup=keyboard)
+        proxy_message = bot.send_message(call.message.chat.id, "Please select The New Proxy IP from The List or Input New:", reply_markup=keyboard)
         proxy_message_id = proxy_message.message_id
         bot.register_next_step_handler(call.message, update_all_proxies, users, proxy_message_id)
     else:
@@ -569,7 +569,7 @@ def redeploy_user(call):
     try:    
         if deployment_status:
             bot.delete_message(call.message.chat.id, wait_message_id)
-            bot.send_message(call.message.chat.id, "✅ CONFIG HAS BEEN CREATED ✅\nDisplayed Immediately ⚡️")
+            bot.send_message(call.message.chat.id, "Config being registered...\n\n\nDisplayed Immediately ⚡️")
             vless_config = create_vless_config(subdomain_from_db, uuid_from_db, user_name_from_db)
             nontls_config = create_nontls_config(subdomain_from_db, uuid_from_db, user_name_from_db)
             sub_link = f"https://{worker_subdomain}/{user_name_from_db}"
@@ -662,7 +662,7 @@ def handle_filename(message):
         replace_uuid_in_file(user_uuid, new_file_path)
         replace_uuid_in_sub_file(user_uuid, new_subsfile_path)
         replace_path_in_subfile(new_file_name_without_extension, new_subsfile_path)
-        bot.send_message(message.chat.id, f"UUID of New User 📌 \n {user_uuid}")
+        bot.send_message(message.chat.id, f"UUID of New User 📌 \n{user_uuid}")
         connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
         cursor.execute('INSERT INTO user (name, uuid) VALUES (?, ?)', (new_file_name_without_extension, user_uuid))
@@ -681,7 +681,7 @@ def handle_filename(message):
             keyboard.add(InlineKeyboardButton(option, callback_data=f"selected_ip:{option}"))
 
         if options:
-            proxy_message = bot.send_message(message.chat.id, "Please Select One Of The Following Options 👇\n\nOr\n\nInput New Cloudflare IP or Domain 🌐", reply_markup=keyboard)
+            proxy_message = bot.send_message(message.chat.id, "Select Options 👇\n\nOr\n\nInput NEW Cloudflare IP 🌐", reply_markup=keyboard)
             proxy_message_id = proxy_message.message_id
         else:
             bot.send_message(message.chat.id, "There are no available options. Please enter a new option.")
@@ -723,7 +723,7 @@ def handle_proxy(message):
     connection.commit()
     connection.close()
     user_states[message.from_user.id]['state'] = 'waiting_for_subdomain_or_worker_name'
-    bot.send_message(message.chat.id, "Enter New Subdomain for Your Worker 👇\nExample :\n\nsg1.mamat.workers.dev\n\nor\n\nsubdomain.yourdomain.com\n\n❌ DO NOT ENTER DOMAIN THAT YOU DON'T HAVE  ❌\n ℹ️ example: subdomain.yourdomain.com \n\n ℹ️ℹ️ DO NOT enter domain that you DO NOT HAVE !")    
+    bot.send_message(message.chat.id, "Enter New Subdomain for Your Worker\nExample : 👇\n\nsg1.mamat.workers.dev\n\nor\n\nsubdomain.yourdomain.com\n\n❌ DO NOT ENTER DOMAIN THAT YOU DON'T HAVE  ❌")    
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('selected_ip:'))
 def handle_selected_ip(call):
@@ -792,7 +792,7 @@ def handle_subdomain_and_worker_name(message):
         subworker_host = f"sub{new_subdomain}"
         replace_subworker_host(subworker_host, new_file_path)
         replace_subdomain_in_file(subworker_host, new_txt_subfile_path)
-        bot.send_message(message.chat.id, f"New User Upload Process ⏳\nWait 30s - 1m ⏱")
+        bot.send_message(message.chat.id, f"New User Upload Process ⏳\nPlease Wait 30s - 1m ⏱")
         
         update_wrangler_toml(new_txt_file_path)
         sent_message = bot.send_message(message.chat.id, "⌛")
@@ -812,7 +812,7 @@ def handle_subdomain_and_worker_name(message):
         
         if deployment_status:
             bot.delete_message(message.chat.id, wait_message_id)
-            bot.send_message(message.chat.id, "✅ CONFIG HAS BEEN CREATED ✅\nDisplayed Immediately ⚡️")
+            bot.send_message(message.chat.id, "Config being registered..\nDisplayed Immediately ⚡️")
             update_wrangler_toml(new_txt_subfile_path)
             run_nvm_use_and_wrangler_deploy(new_subsfile_path)
             vless_config = create_vless_config(new_subdomain, user_uuid, new_file_name)
@@ -820,7 +820,7 @@ def handle_subdomain_and_worker_name(message):
             sub_link = f"https://{subworker_host}/{new_file_name_without_extension}"
             non_tls_config_html = f"<code>{nontls_config}</code>"
             vless_config_html = f"<code>{vless_config}</code>"
-            message_text = f"🔰 VLESS CONFIG 🔰\n\n🔗 TLS 👇\n{vless_config_html}\n\n🔗 Non TLS 👇\n {non_tls_config_html}\n\nSUB Link ⛓\n\n {sub_link}"
+            message_text = f"🔰 VLESS CONFIG 🔰\n\n🔗 TLS 👇\n{vless_config_html}\n\n🔗 Non TLS 👇\n {non_tls_config_html}\n\nSUB Link ⛓\n\n {sub_link}\n\n {sub_link}\n\nLET'S PLAY AND FREEDOM⚡️"
             menu_markup = InlineKeyboardMarkup()
             add_user_button = InlineKeyboardButton("➕ Add User", callback_data="add_user")
             user_panel_button = InlineKeyboardButton("🔰 User Panel", callback_data="user_panel")
