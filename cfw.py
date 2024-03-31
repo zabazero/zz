@@ -569,7 +569,7 @@ def redeploy_user(call):
     try:    
         if deployment_status:
             bot.delete_message(call.message.chat.id, wait_message_id)
-            bot.send_message(call.message.chat.id, "Config being registered...\n\n\nDisplayed Immediately ⚡️")
+            bot.send_message(call.message.chat.id, "Config being registered ⚡️\n\nWill be notifed, when it is ready, be patient.. 😊")
             vless_config = create_vless_config(subdomain_from_db, uuid_from_db, user_name_from_db)
             nontls_config = create_nontls_config(subdomain_from_db, uuid_from_db, user_name_from_db)
             sub_link = f"https://{worker_subdomain}/{user_name_from_db}"
@@ -812,7 +812,7 @@ def handle_subdomain_and_worker_name(message):
         
         if deployment_status:
             bot.delete_message(message.chat.id, wait_message_id)
-            bot.send_message(message.chat.id, "Config being registered..\nDisplayed Immediately ⚡️")
+            bot.send_message(message.chat.id, "Config being registered ⚡️\n\nWill be notifed, when it is ready, be patient.. 😊")
             update_wrangler_toml(new_txt_subfile_path)
             run_nvm_use_and_wrangler_deploy(new_subsfile_path)
             vless_config = create_vless_config(new_subdomain, user_uuid, new_file_name)
