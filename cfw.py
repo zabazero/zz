@@ -44,14 +44,14 @@ def send_welcome(message):
 
     menu_markup = InlineKeyboardMarkup()
     add_user_button = InlineKeyboardButton("➕ Add Config", callback_data="add_user")
-    user_panel_button = InlineKeyboardButton("🔰 Configs Panel", callback_data="user_panel")
-    subscriptions_button = InlineKeyboardButton("📋 Notes", callback_data="subscriptions") 
-    proxy_txt_button = InlineKeyboardButton("📁 IP / CF Proxies", callback_data="proxy_list")
-    menu_markup.add(add_user_button, user_panel_button)  
+    user_panel_button = InlineKeyboardButton("🔰 Config Panel", callback_data="user_panel")
+    subscriptions_button = InlineKeyboardButton("📋 Tutorial", callback_data="subscriptions")
+    proxy_txt_button = InlineKeyboardButton("📁 CF Proxies", callback_data="proxy_list")
+    menu_markup.add(add_user_button, user_panel_button)
     menu_markup.add(subscriptions_button)
     menu_markup.add(proxy_txt_button)
     welcome_message = "Welcome to VLESS CFW Bot⚡️\n\nLET'S PLAY AND FREEDOM 🚀"
-    
+
     bot.send_message(message.chat.id, welcome_message, reply_markup=menu_markup)
 
 @bot.callback_query_handler(func=lambda call: call.data == 'proxy_list')
@@ -61,10 +61,10 @@ def proxylist(call):
     if os.path.isfile(filename):
         with open(filename, 'r') as file:
             proxies_content = file.read()
-        bot.send_message(call.message.chat.id, f"📁 Current IP Proxies :\n<code>{proxies_content}</code>", parse_mode="HTML")
+        bot.send_message(call.message.chat.id, f"📁 | Current Proxies:\n<code>{proxies_content}</code>", parse_mode="HTML")
     else:
         bot.send_message(call.message.chat.id, "No proxies found in proxies.txt.")
-    
+
     bot.send_message(call.message.chat.id, "Enter a favorite IP Proxies each on separate line space ⏬\n\nYou can use to create config or change config proxies.")
     bot.register_next_step_handler(call.message, handle_proxies_input)
 
@@ -95,7 +95,7 @@ def subscriptions(call):
     load_dotenv()
     ip_api = os.getenv('IP_API')
     bot.delete_message(call.message.chat.id, call.message.message_id)
-    message_text = f"Register Cloudflare Workers to Get Subdomain Link 👇\n\n{ip_api}"
+    message_text = f"The value of IP_API is: {ip_api}"
 
     keyboard = [
         [InlineKeyboardButton("🔙 Return", callback_data="keep_ip_api")]
@@ -108,7 +108,7 @@ def subscriptions(call):
 def subscriptions(call):
     bot.delete_message(call.message.chat.id, call.message.message_id)
     user_states[call.from_user.id] = 'waiting_for_api'
-    message_text = "Write what you want to save for BUG or Proxy IP needs that you might want to remember here:"
+    message_text = "Please provide the new value for IP_API."
 
     bot.send_message(call.message.chat.id, message_text)
 
@@ -116,7 +116,7 @@ def subscriptions(call):
 def keep_ip_api(call):
     bot.delete_message(call.message.chat.id, call.message.message_id)
     send_welcome(call.message)
-    
+
 @bot.message_handler(func=lambda message: user_states.get(message.from_user.id) == 'waiting_for_api')
 def handle_new_api_value(message):
     new_api_value = message.text.strip()
@@ -144,10 +144,10 @@ def return_to_start(call):
     send_welcome(call.message)
     bot.delete_message(call.message.chat.id, call.message.message_id)
 
-    
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith('user_panel'))
 def user_panel_cfw(call):
-    global proxy_state 
+    global proxy_state
     proxy_state = False
     bot.delete_message(call.message.chat.id, call.message.message_id)
     connection = sqlite3.connect(db_path)
@@ -157,22 +157,22 @@ def user_panel_cfw(call):
     rows = cursor.fetchall()
 
     keyboard = InlineKeyboardMarkup()
-    
+
     for row in rows:
         name = row[0]
-        callback_data = f"user:{name}"  
-        button = InlineKeyboardButton("👤|" + name, callback_data=callback_data)
+        callback_data = f"user:{name}"
+        button = InlineKeyboardButton("👤 | " + name, callback_data=callback_data)
         keyboard.add(button)
 
-    change_all_button = InlineKeyboardButton("🆕 Proxy for CONFIGS", callback_data="change_all_proxies")
+    change_all_button = InlineKeyboardButton("🆕 Proxy for Configs", callback_data="change_all_proxies")
     keyboard.add(change_all_button)
 
     return_button = InlineKeyboardButton("🔙 Return", callback_data="return")
     keyboard.add(return_button)
-    
+
     connection.close()
 
-    bot.send_message(call.message.chat.id, "Select User ♻️", reply_markup=keyboard)
+    bot.send_message(call.message.chat.id, "Select a user:", reply_markup=keyboard)
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('user:'))
 def user_info_callback(call):
@@ -191,7 +191,7 @@ def user_info_callback(call):
         keyboard = InlineKeyboardMarkup()
         return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
         keyboard.add(return_button)
-        bot.send_message(call.message.chat.id, f"❌ DELETED ❌\nConfig for '{user_name}' its Not Valid!", reply_markup=keyboard)
+        bot.send_message(call.message.chat.id, f"❌ ℹ️ Deleted '{user_name}', its was not valid❌", reply_markup=keyboard)
         connection.close()
         return
 
@@ -203,14 +203,14 @@ def user_info_callback(call):
         vless_link = create_vless_config(subdomain, uuid, user_name)
         nontls_config = create_nontls_config(subdomain, uuid, user_name)
         sub_link = f"https://sub{subdomain}/{user_name}"
-        message_text = f"🔰 CONFIG INFO 🔰</b>\n\n"
+        message_text = f"<b>🔰 CONFIG INFO 🔰</b>\n\n"
         message_text += f"👤 <b>Name :</b> {user_name}\n"
         message_text += f"🔑 <b>UUID :</b> {uuid}\n"
         message_text += f"🌐 <b>IP :</b> {ip}\n"
         message_text += f"📡 <b>Subdomain :</b> {subdomain}\n\n"
-        message_text += f"🔗 <b>TLS<b> :\n\n<code>{vless_link}</code>\n\n"
-        message_text += f"🔗 <b>Non TLS<b> :\n\n<code>{nontls_config}</code>\n\n"
-        message_text += f"📋 : <code>{sub_link}</code>\n\n<b>LET'S PLAY AND FREEDOM ⚡️<b>"
+        message_text += f"🔗 TLS :\n\n<code>{vless_link}</code>\n\n"
+        message_text += f"🔗 Non TLS  :\n\n<code>{nontls_config}</code>\n\n"
+        message_text += f"📋 : <code>{sub_link}</code>\n\nLET'S PLAY AND FREEDOM ⚡️"
 
         keyboard = InlineKeyboardMarkup()
         delete_button = InlineKeyboardButton("🗑️ Delete", callback_data=f"delete:{user_name}")
@@ -262,9 +262,9 @@ def delete_sub_worker(account_id, api_token, worker_name):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('change_all_proxies'))
 def change_all_user_proxies(call):
     bot.delete_message(call.message.chat.id, call.message.message_id)
-    global proxy_message_id 
+    global proxy_message_id
     global proxy_state
-    proxy_state = True 
+    proxy_state = True
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
     cursor.execute('SELECT name FROM user')
@@ -287,7 +287,7 @@ def change_all_user_proxies(call):
     connection.close()
 
     if options:
-        proxy_message = bot.send_message(call.message.chat.id, "Please select the new Proxy IP from the list or input new:", reply_markup=keyboard)
+        proxy_message = bot.send_message(call.message.chat.id, "Please select the New Proxy ↙️from the list or input new :", reply_markup=keyboard)
         proxy_message_id = proxy_message.message_id
         bot.register_next_step_handler(call.message, update_all_proxies, users, proxy_message_id)
     else:
@@ -313,13 +313,13 @@ def update_all_proxies(message, users, proxy_message_id):
                     user_name = user[0]
                     cursor.execute('UPDATE user SET ip = ? WHERE name = ?', (new_proxy_ip, user_name))
 
-                message_text = f"✅ Proxy IPs Updated for All Config! ✅\n\n New Proxy is ➡️\n {new_proxy_ip}\n\n"
+                message_text = f"✅ Proxy IPs Updated for All Config! ✅\n\nNew Proxy ↙️\n{new_proxy_ip}"
                 keyboard = InlineKeyboardMarkup()
                 return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
                 keyboard.add(return_button)
                 bot.send_message(message.chat.id, message_text, reply_markup=keyboard, parse_mode="HTML")
         except Exception as e:
-            error_message_txt = "❌ Failed to update proxy IPs. Please try again later. ❌"
+            error_message_txt = "❌ FAILED TO UPDATE PROXY ❌\nPlease try again...🔙"
             keyboard = InlineKeyboardMarkup()
             return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
             keyboard.add(return_button)
@@ -331,10 +331,10 @@ def update_all_proxies(message, users, proxy_message_id):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('newproxy_for_all:'))
 def change_proxy_for_all(call):
-    global proxy_message_id 
+    global proxy_message_id
     global proxy_state
     bot.delete_message(call.message.chat.id, call.message.message_id)
-    new_proxy_ip = call.data.split(':')[1] 
+    new_proxy_ip = call.data.split(':')[1]
 
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
@@ -348,7 +348,7 @@ def change_proxy_for_all(call):
                 user_name = user[0]
                 cursor.execute('UPDATE user SET ip = ? WHERE name = ?', (new_proxy_ip, user_name))
 
-            message_text = f"✅ Proxy IPs Updated for All Config! ✅ \n\n New Proxy is ➡️\n {new_proxy_ip}"
+            message_text = f"Proxy IP has been updated for All Configs ✅\n\nNew Proxy ↙️\n{new_proxy_ip}"
             keyboard = InlineKeyboardMarkup()
             return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
             keyboard.add(return_button)
@@ -365,7 +365,7 @@ def change_proxy_for_all(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('newproxy:'))
 def change_user_proxy(call):
-    global proxy_message_id 
+    global proxy_message_id
     global proxy_state
     proxy_state = True
 
@@ -381,7 +381,7 @@ def change_user_proxy(call):
 
         cursor.execute('SELECT DISTINCT ip FROM user WHERE ip IS NOT NULL')
         ips = [ip[0] for ip in cursor.fetchall()]
-        
+
         proxies = []
         if os.path.isfile('proxies.txt'):
             with open('proxies.txt', 'r') as file:
@@ -396,7 +396,7 @@ def change_user_proxy(call):
         return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
         keyboard.add(return_button)
 
-        proxy_message = bot.send_message(call.message.chat.id, f"Current Proxy for 👤 {user_name}\n{proxyip_from_db}\n\nSelect the new proxy from the list or input new to change :", reply_markup=keyboard)
+        proxy_message = bot.send_message(call.message.chat.id, f"Current Proxy for 👤 {user_name}\n{proxyip_from_db}\n\n Select the new proxy from the list or input new to change", reply_markup=keyboard)
         proxy_message_id = proxy_message.message_id
         bot.register_next_step_handler(call.message, update_proxy_ip, user_name, connection, proxy_message_id)
 
@@ -419,8 +419,8 @@ def update_proxy_ip(message, user_name, connection, proxy_message_id):
             with connection:
                 cursor = connection.cursor()
                 cursor.execute('UPDATE user SET ip = ? WHERE name = ?', (new_proxy_ip, user_name))
-                message_text = f"IP Proxy Has Been Updated for Config  👤 {user_name} ✅\n\nNew Proxy IP : \n {new_proxy_ip}"
-                
+                message_text = f"IP Proxy has been updated for config 👤 {user_name} ✅\n\nNew Proxy ↙️\n {new_proxy_ip}"
+
                 keyboard = InlineKeyboardMarkup()
                 redeploy_button = InlineKeyboardButton("🔄 Redeploy", callback_data=f"redeploy:{user_name}")
                 return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
@@ -433,7 +433,7 @@ def update_proxy_ip(message, user_name, connection, proxy_message_id):
             keyboard = InlineKeyboardMarkup()
             return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
             keyboard.add(return_button)
-            bot.send_message(message.chat.id, error_message_txt, reply_markup=keyboard, parse_mode="HTML") 
+            bot.send_message(message.chat.id, error_message_txt, reply_markup=keyboard, parse_mode="HTML")
         finally:
             connection.close()
             proxy_state = False
@@ -451,8 +451,8 @@ def select_new_proxy(call):
         with connection:
             cursor = connection.cursor()
             cursor.execute('UPDATE user SET ip = ? WHERE name = ?', (new_proxy_ip, user_name))
-            message_text = f"IP Proxy has been updated for Config  👤 {user_name} !✅\n\nNew Proxy IP : \n {new_proxy_ip}"
-            
+            message_text = f"IP Proxy has been updated for config 👤 {user_name} ✅\n\nNew Proxy ↙️\n{new_proxy_ip}"
+
             keyboard = InlineKeyboardMarkup()
             redeploy_button = InlineKeyboardButton("🔄 Redeploy", callback_data=f"redeploy:{user_name}")
             return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
@@ -461,15 +461,15 @@ def select_new_proxy(call):
 
             bot.send_message(call.message.chat.id, message_text, reply_markup=keyboard, parse_mode="HTML")
     except Exception as e:
-        error_message_txt = "❌Failed to update proxy IP. Try Again please ❌"
+        error_message_txt = "❌ FAILED TO UPDATE PROXY ❌\nPlease try again..🔙"
         keyboard = InlineKeyboardMarkup()
         return_button = InlineKeyboardButton("🔙 Return", callback_data="user_panel")
         keyboard.add(return_button)
-        bot.send_message(call.message.chat.id, error_message_txt, reply_markup=keyboard, parse_mode="HTML") 
+        bot.send_message(call.message.chat.id, error_message_txt, reply_markup=keyboard, parse_mode="HTML")
     finally:
         connection.close()
         proxy_state = False
- 
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith('qr:'))
 def qr_vless(call):
 
@@ -523,7 +523,7 @@ def redeploy_user(call):
     bot.delete_message(call.message.chat.id, call.message.message_id)
 
     user_name = call.data.split(':')[1]
-    bot.send_message(call.message.chat.id, f"🌐 Redeployment of {user_name} Started 🌐")
+    bot.send_message(call.message.chat.id, f"Redeployment of {user_name} started🌐")
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
 
@@ -532,10 +532,10 @@ def redeploy_user(call):
 
     if row:
         print("User Details:")
-        print(f"Name : {row[0]}")
-        print(f"UUID : {row[1]}")
-        print(f"Subdomain : {row[2]}")
-        print(f"IP : {row[3]}")
+        print(f"Name: {row[0]}")
+        print(f"UUID: {row[1]}")
+        print(f"Subdomain: {row[2]}")
+        print(f"IP: {row[3]}")
 
         user_name_from_db = row[0]
         file_name_with_extension = f"{user_name_from_db}.js"
@@ -565,10 +565,10 @@ def redeploy_user(call):
 
 
 
-    try:    
+    try:
         if deployment_status:
             bot.delete_message(call.message.chat.id, wait_message_id)
-            bot.send_message(call.message.chat.id, "Config being registered ⚡️\n\nWill be notifed, when it's ready.\nPlease be patient 😊")
+            bot.send_message(call.message.chat.id, "Config being registered ⌛\n\nWill be notifed, when it's ready.\nPlease be patient 😊")
             vless_config = create_vless_config(subdomain_from_db, uuid_from_db, user_name_from_db)
             nontls_config = create_nontls_config(subdomain_from_db, uuid_from_db, user_name_from_db)
             sub_link = f"https://{worker_subdomain}/{user_name_from_db}"
@@ -577,7 +577,7 @@ def redeploy_user(call):
             message_text = f"🔰 VLESS CONFIG 🔰\n------------------------------------\nTap the link to copy the config\n------------------------------------\n🔗 TLS 👇\n----------------------------------------------------\n{vless_config_html}\n----------------------------------------------------\n🔗 Non TLS 👇\n----------------------------------------------------\n{non_tls_config_html}\n----------------------------------------------------\nSUB Link ⛓\n----------------------------------------------------\n{sub_link}\n----------------------------------------------------\nLET'S PLAY AND FREEDOM⚡️"
             menu_markup = InlineKeyboardMarkup()
             add_user_button = InlineKeyboardButton("➕ Add Config", callback_data="add_user")
-            user_panel_button = InlineKeyboardButton("🔰 Config Panel", callback_data="user_panel")
+            user_panel_button = InlineKeyboardButton("🔰 User Panel", callback_data="user_panel")
             menu_markup.add(add_user_button, user_panel_button)
             bot.send_message(call.message.chat.id, message_text, reply_markup=menu_markup, parse_mode="HTML")
         else:
@@ -586,7 +586,7 @@ def redeploy_user(call):
         bot.delete_message(call.message.chat.id, wait_message_id)
         menu_markup = InlineKeyboardMarkup()
         add_user_button = InlineKeyboardButton("➕ Add Config", callback_data="add_user")
-        user_panel_button = InlineKeyboardButton("🔰 Config Panel", callback_data="user_panel")
+        user_panel_button = InlineKeyboardButton("🔰 User Panel", callback_data="user_panel")
         menu_markup.add(add_user_button, user_panel_button)
         bot.send_message(call.message.chat.id, f"❌Deployment failed. Error: {str(e)}❌", reply_markup=menu_markup)
 
@@ -608,7 +608,7 @@ def delete_user(call):
 
     menu_markup = InlineKeyboardMarkup()
     add_user_button = InlineKeyboardButton("➕ Add Config", callback_data="add_user")
-    user_panel_button = InlineKeyboardButton("🔰 Config Panel", callback_data="user_panel")
+    user_panel_button = InlineKeyboardButton("🔰 User Panel", callback_data="user_panel")
     menu_markup.add(add_user_button, user_panel_button)
     bot.send_message(call.message.chat.id, f"🗑 CONFIG for '{user_name}' DELETED 🗑", reply_markup=menu_markup)
 
@@ -618,16 +618,16 @@ def add_user_cfw(call):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     cancel_button = types.KeyboardButton("Cancel")
     keyboard.add(cancel_button)
-    
+
     bot.delete_message(call.message.chat.id, call.message.message_id)
     user_states[call.from_user.id] = 'waiting_for_filename'
-    
-    bot.send_message(call.message.chat.id, "Enter the name for 'Config Account' want to create :", reply_markup=keyboard)
+
+    bot.send_message(call.message.chat.id, "Please enter the name of your new user. ", reply_markup=keyboard)
 
 
 @bot.message_handler(func=lambda message: user_states.get(message.from_user.id) == 'waiting_for_filename')
 def handle_filename(message):
-    global proxy_message_id 
+    global proxy_message_id
     if message.text.strip().lower() == 'cancel':
         del user_states[message.from_user.id]
         bot.send_message(message.chat.id, "❌ PROCESS CANCELED ❌")
@@ -647,7 +647,7 @@ def handle_filename(message):
     ips = [ip[0] for ip in cursor.fetchall()]
     connection.close()
 
-    
+
     if existing_user:
         bot.send_message(message.chat.id, "User already exists with this name. Please enter a different name.")
     else:
@@ -656,7 +656,7 @@ def handle_filename(message):
         create_duplicate_file(index_js_path, new_file_path)
         create_duplicate_file(subs_js_path, new_subsfile_path)
         bot.send_message(message.chat.id, f"User '{new_file_name}' Created ✅")
-        
+
         user_uuid = generate_uuid()
         replace_uuid_in_file(user_uuid, new_file_path)
         replace_uuid_in_sub_file(user_uuid, new_subsfile_path)
@@ -667,7 +667,7 @@ def handle_filename(message):
         cursor.execute('INSERT INTO user (name, uuid) VALUES (?, ?)', (new_file_name_without_extension, user_uuid))
         connection.commit()
         connection.close()
-        
+
         proxies = []
         if os.path.isfile('proxies.txt'):
             with open('proxies.txt', 'r') as file:
@@ -683,14 +683,14 @@ def handle_filename(message):
             proxy_message = bot.send_message(message.chat.id, "Select the Proxy IP fot the config\nOr input NEW Cloudflare IP 🌐", reply_markup=keyboard)
             proxy_message_id = proxy_message.message_id
         else:
-            bot.send_message(message.chat.id, "There are no available options. Please enter a new option.")
+            bot.send_message(message.chat.id, "There are no available IP options.\nPlease enter a new IP options")
 
         user_states[message.from_user.id] = {'state': 'waiting_for_proxy', 'file_name':  new_file_name, 'uuid': user_uuid}
         return
 
 @bot.message_handler(func=lambda message: user_states.get(message.from_user.id, {}).get('state') == 'waiting_for_proxy')
 def handle_proxy(message):
-    global proxy_message_id 
+    global proxy_message_id
     if message.text.strip().lower() == 'cancel':
         del user_states[message.from_user.id]
         bot.send_message(message.chat.id, "❌ PROCESS CANCELED ❌")
@@ -702,19 +702,19 @@ def handle_proxy(message):
         except Exception as e:
             print("Error deleting message:", e)
     new_proxy_ip = message.text.strip()
-    
+
     new_file_name = user_states[message.from_user.id]['file_name']
-    
+
     new_file_path = os.path.join(users_directory, new_file_name)
-    
+
     replace_proxy_ip_in_file(new_proxy_ip, new_file_path)
-    bot.send_message(message.chat.id, f"New Proxy Setting Added ➡️{new_proxy_ip}")
+    bot.send_message(message.chat.id, f"New proxy setting added  ↙️\n{new_proxy_ip}")
 
     new_txt_file_name = new_file_name.replace('.js', '.txt')
     create_duplicate_file('workertemp.txt', os.path.join(users_directory, new_txt_file_name))
     new_txt_subfile_name = new_file_name.replace('.js', '_sub.txt')
     create_duplicate_file('workertemp.txt', os.path.join(users_directory, new_txt_subfile_name))
-    bot.send_message(message.chat.id, f"Duplicated 'workertemp.txt' as '{new_txt_file_name}' in 'users' directory...")
+    bot.send_message(message.chat.id, f"Duplicated 'workertemp.txt' as '{new_txt_file_name}' in 'users' directory.")
     new_file_name_without_extension = new_file_name.replace('.js', '')
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
@@ -722,22 +722,22 @@ def handle_proxy(message):
     connection.commit()
     connection.close()
     user_states[message.from_user.id]['state'] = 'waiting_for_subdomain_or_worker_name'
-    bot.send_message(message.chat.id, "Enter New Subdomain for Your Worker\nExample : 👇\n\nsg1.mamat.workers.dev\n\nor\n\nsubdomain.yourdomain.com\n\n❌ DO NOT ENTER DOMAIN THAT YOU DON'T HAVE ❌")    
+    bot.send_message(message.chat.id, "Enter New Subdomain for Your Worker\nExample : 👇\n\nsg1.mamat.workers.dev\n\nor\n\nsubdomain.yourdomain.com\n\n❌ DO NOT ENTER DOMAIN THAT YOU DON'T HAVE ❌")
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('selected_ip:'))
 def handle_selected_ip(call):
     bot.delete_message(call.message.chat.id, call.message.message_id)
-    selected_ip = call.data.split(':')[1]  
+    selected_ip = call.data.split(':')[1]
     new_file_name = user_states[call.from_user.id]['file_name']
     new_file_path = os.path.join(users_directory, new_file_name)
     replace_proxy_ip_in_file(selected_ip, new_file_path)
-    bot.send_message(call.message.chat.id, f"Selected Proxy Setting Added 📌\n{selected_ip}")
+    bot.send_message(call.message.chat.id, f"Selected proxy setting added 📌\n{selected_ip}")
 
     new_txt_file_name = new_file_name.replace('.js', '.txt')
     create_duplicate_file('workertemp.txt', os.path.join(users_directory, new_txt_file_name))
     new_txt_subfile_name = new_file_name.replace('.js', '_sub.txt')
     create_duplicate_file('workertemp.txt', os.path.join(users_directory, new_txt_subfile_name))
-    bot.send_message(call.message.chat.id, f"Duplicated 'workertemp.txt' as '{new_txt_file_name}' in 'users' directory...")
+    bot.send_message(call.message.chat.id, f"Duplicated 'workertemp.txt' as '{new_txt_file_name}' in 'users' directory.")
     new_file_name_without_extension = new_file_name.replace('.js', '')
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
@@ -766,14 +766,14 @@ def handle_subdomain_and_worker_name(message):
 
     if existing_user:
         bot.send_message(message.chat.id, f"❌FAILED❌\nThe subdomain '{new_subdomain}' already exists. Please enter a different subdomain!")
-        
+
     else:
         new_file_name = user_states[message.from_user.id]['file_name']
         new_file_name_without_extension = new_file_name.replace('.js', '')
 
         user_uuid = user_states[message.from_user.id]['uuid']
         new_file_path = os.path.join(users_directory, new_file_name)
-    
+
         new_txt_file_name = new_file_name.replace('.js', '.txt')
         new_txt_file_path = os.path.join(users_directory, new_txt_file_name)
         new_txt_subfile_name = new_file_name.replace('.js', '_sub.txt')
@@ -781,7 +781,7 @@ def handle_subdomain_and_worker_name(message):
         new_subfile_name = new_file_name_without_extension + "_sub.js"
         new_subsfile_path = os.path.join(users_directory, new_subfile_name)
         replace_subdomain_in_file(new_subdomain, new_txt_file_path)
-        
+
         replace_subdomain_in_subfile(new_subdomain, new_subsfile_path)
         replace_ip_api(ip_api, new_subsfile_path)
         subworker_name = f"subworker{new_file_name_without_extension}"
@@ -792,26 +792,26 @@ def handle_subdomain_and_worker_name(message):
         replace_subworker_host(subworker_host, new_file_path)
         replace_subdomain_in_file(subworker_host, new_txt_subfile_path)
         bot.send_message(message.chat.id, f"New config upload process.. ⏳\nPlease wait 30s - 1m ⏱")
-        
+
         update_wrangler_toml(new_txt_file_path)
         sent_message = bot.send_message(message.chat.id, "⌛")
         wait_message_id = sent_message.message_id
 
-        
+
         connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
         cursor.execute('UPDATE user SET subdomain = ? WHERE name = ?', (new_subdomain, new_file_name_without_extension))
         connection.commit()
         connection.close()
-        
+
         new_js_file_path = os.path.join(users_directory, new_file_name)
-        
+
         deployment_status = run_nvm_use_and_wrangler_deploy(new_js_file_path)
 
-        
+
         if deployment_status:
             bot.delete_message(message.chat.id, wait_message_id)
-            bot.send_message(message.chat.id, "Config being registered ⚡️\n\nWill be notifed, when it's ready.\nPlease be patient 😊")
+            bot.send_message(message.chat.id, "Config being registered ⌛\n\nWill be notifed, when it's ready.\nPlease be patient 😊")
             update_wrangler_toml(new_txt_subfile_path)
             run_nvm_use_and_wrangler_deploy(new_subsfile_path)
             vless_config = create_vless_config(new_subdomain, user_uuid, new_file_name)
@@ -822,7 +822,7 @@ def handle_subdomain_and_worker_name(message):
             message_text = f"🔰 VLESS CONFIG 🔰\n------------------------------------\nTap the link to copy the config\n------------------------------------\n🔗 TLS 👇\n----------------------------------------------------\n{vless_config_html}\n----------------------------------------------------\n🔗 Non TLS 👇\n----------------------------------------------------\n{non_tls_config_html}\n----------------------------------------------------\nSUB Link ⛓\n----------------------------------------------------\n{sub_link}\n----------------------------------------------------\nLET'S PLAY AND FREEDOM⚡️"
             menu_markup = InlineKeyboardMarkup()
             add_user_button = InlineKeyboardButton("➕ Add Config", callback_data="add_user")
-            user_panel_button = InlineKeyboardButton("🔰 Config Panel", callback_data="user_panel")
+            user_panel_button = InlineKeyboardButton("🔰 User Panel", callback_data="user_panel")
             menu_markup.add(add_user_button, user_panel_button)
             bot.send_message(message.chat.id, message_text, reply_markup=menu_markup, parse_mode="HTML")
             del user_states[message.from_user.id]
@@ -831,9 +831,9 @@ def handle_subdomain_and_worker_name(message):
             bot.delete_message(message.chat.id, wait_message_id)
             menu_markup = InlineKeyboardMarkup()
             add_user_button = InlineKeyboardButton("➕ Add Config", callback_data="add_user")
-            user_panel_button = InlineKeyboardButton("🔰 Config Panel", callback_data="user_panel")
+            user_panel_button = InlineKeyboardButton("🔰 User Panel", callback_data="user_panel")
             menu_markup.add(add_user_button, user_panel_button)
-            bot.send_message(message.chat.id, "❌ DEPLOYMENT FAILED ❌\n\nNote : Please check the validation of your sub/domain CFW", reply_markup=menu_markup)
+            bot.send_message(message.chat.id, "❌DEPLOY FAILED❌\n\nPlease check your CF Domain.", reply_markup=menu_markup)
 
 def create_vless_config(new_subdomain, user_uuid, new_file_name):
     if new_file_name.endswith('.js'):
@@ -873,7 +873,7 @@ def update_wrangler_toml(new_txt_file_path):
 def replace_name_in_file(name, file_path):
     with open(file_path, 'r') as file:
         file_contents = file.read()
-    name_without_extension = name.replace('.txt', '')  
+    name_without_extension = name.replace('.txt', '')
     modified_contents = file_contents.replace('name = "nameofworker"', f'name = "{name_without_extension}"')
     with open(file_path, 'w') as file:
         file.write(modified_contents)
@@ -927,7 +927,7 @@ def replace_uuid_in_sub_file(uuid, file_path):
     modified_contents = file_contents.replace("uuid = env.UUID || 'uuid';", f"uuid = env.UUID || '{uuid}';")
     with open(file_path, 'w') as file:
         file.write(modified_contents)
-        
+
 def replace_subworker_host(workerhost, file_path):
     with open(file_path, 'r') as file:
         file_contents = file.read()
@@ -956,7 +956,7 @@ def replace_proxy_ip_in_file(proxy_ip, file_path):
 # #             print("\nBot has been stopped.")
 # #             break
 
-# non stop pull , for termination hold Ctrl+c        
+# non stop pull , for termination hold Ctrl+c
 def start_bot():
     while True:
         try:
@@ -969,5 +969,5 @@ def start_bot():
             time.sleep(10)
 
 if __name__ == "__main__":
-    print("✅ CFW BOT STARTED ✅\n🚀LET'S PLAY AND FREEDOM 🚀")
+    print("✅ CFW BOT STARTED ✅\n ✌️ RISE UP AND FIGHT FOR FREEDOM ✌️")
     start_bot()
